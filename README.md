@@ -1,5 +1,10 @@
 # RecordFieldsetView
 
+<a href="https://githubsfdeploy.herokuapp.com">
+  <img alt="Deploy to Salesforce"
+       src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
+</a>
+
 A Fieldset Lightning Component for Salesforce Lightning Experience.
 
 The component can be added to any Record Home Layout.
