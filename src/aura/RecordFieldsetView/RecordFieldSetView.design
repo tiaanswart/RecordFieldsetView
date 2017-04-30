@@ -1,0 +1,14 @@
+<design:component>
+    <design:attribute name="showIcon" label="Show Icon" description="Show the header icon"/>
+    <design:attribute name="icon" label="Icon" description="The lightning icon as iconType:iconName"/>
+    <design:attribute name="iconSize" label="Icon Size" description="The size of the lightning icon. Possible values: small, medium, large."/>
+    <design:attribute name="showTitle" label="Show Title" description="Show the header title"/>
+    <design:attribute name="title" label="Title" description="The header title"/>
+    <design:attribute name="setNameAsTitle" label="Set Name As Title" description="Set the record name as the title"/>
+    <design:attribute name="showObjectTypeTitle" label="Show SObject Type" description="Show the SObject Type in the header"/>
+    <design:attribute name="fieldSetName" label="Fieldset" description="The fieldset for this record type"/>
+    <design:attribute name="columns" label="Columns" description="The number of columns for this record layout"/>
+    <design:attribute name="allowCreateNew" label="Allow Create New" description="Allow creating a new record"/>
+    <design:attribute name="allowEdit" label="Allow Edit" description="Allow Editing the record"/>
+    <design:attribute name="allowRefresh" label="Allow Refresh" description="Allow Refreshing the record"/>
+</design:component>

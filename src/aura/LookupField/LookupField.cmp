@@ -1,0 +1,195 @@
+<aura:component controller="FieldsetService">
+
+    <!-- Handle component initiation -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <!-- Attributes required for lookup -->
+    <aura:attribute name="recordId" type="String" required="true"/>
+    <aura:attribute name="sObjectName" type="String" required="true"/>
+    <aura:attribute name="name" type="String" required="true"/>
+    <aura:attribute name="label" type="String" required="true"/>
+    <aura:attribute name="required" type="Boolean" required="true"/>
+    <aura:attribute name="disabled" type="Boolean" required="true"/>
+    <aura:attribute name="editMode" type="Boolean" required="true"/>
+
+    <!-- Layout specific attributes -->
+    <aura:attribute name="sObjectTypeLabel" type="String" access="PRIVATE"/>
+    <aura:attribute name="sObjectTypeLabelPlural" type="String" access="PRIVATE"/>
+    <aura:attribute name="expanded" type="Boolean" default="false" access="PRIVATE"/>
+    <aura:attribute name="searchComplete" type="Boolean" default="true" access="PRIVATE"/>
+    <aura:attribute name="searchTerm" type="String" access="PRIVATE"/>
+    <aura:attribute name="results" type="List" access="PRIVATE"/>
+
+    <!-- General error variable for the lookup -->
+    <aura:attribute name="theError" type="String" access="PRIVATE"/>
+
+    <!-- Attributes used by Record Preview -->
+    <aura:attribute name="theRecord" type="Object" access="PRIVATE"/>
+    <aura:attribute name="theRecordError" type="String" access="PRIVATE"/>
+    <aura:attribute name="fieldNames" type="String[]" default="['Name']" access="PRIVATE"/>
+
+    <!-- Record Preview - used to query the record and share with the page -->
+    <force:recordPreview aura:id="forceRecord"
+                         fields="{!v.fieldNames}"
+                         recordId="{!v.recordId}"
+                         targetRecord="{!v.theRecord}"
+                         targetError="{!v.theRecordError}"
+                         recordUpdated="{!c.recordUpdated}"
+                         mode="{!v.editMode ? 'EDIT' : 'VIEW'}"/>
+
+    <!-- Attributes used by Record Preview -->
+    <aura:attribute name="theSelectedId" type="String" access="PRIVATE"/>
+    <aura:attribute name="theSelectedRecord" type="Object" access="PRIVATE"/>
+    <aura:attribute name="theSelectedRecordError" type="String" access="PRIVATE"/>
+
+    <!-- Record Preview - used to query the record and share with the page -->
+    <force:recordPreview aura:id="selectedRecord"
+                         fields="['Id','Name','CreatedDate','LastModifiedDate']"
+                         recordId="{!v.theSelectedId}"
+                         targetRecord="{!v.theSelectedRecord}"
+                         targetError="{!v.theSelectedRecordError}"
+                         recordUpdated="{!c.selectedRecordUpdated}"
+                         mode="VIEW"/>
+
+    <!-- Loading spinner for processing feedback -->
+    <lightning:spinner aura:id="loadingSpinner" size="small" variant="brand" alternativeText="Record loading. Please wait."/>
+
+    <!-- Display an error if we have one -->
+    <aura:if isTrue="{!or(not(empty(v.theError)),or(and(not(empty(v.theRecordError)),not(empty(v.recordId))),and(not(empty(v.theSelectedRecordError)),not(empty(v.theSelectedId)))))}">
+        <ui:message title="Error" severity="error">
+            {!v.theError}&nbsp;{!v.theRecordError}&nbsp;{!and(not(empty(v.theSelectedRecordError)),not(empty(v.theSelectedId))) ? v.theSelectedRecordError : ''}
+        </ui:message>
+    </aura:if>
+
+    <!-- Lookup container, expanded if searching -->
+    <div class="{!'slds-form-element slds-lookup'+(v.expanded ? ' slds-is-open' : '')}" data-select="single">
+
+        <!-- Lookup field if editable and editmode is enabled -->
+        <aura:if isTrue="{!and(v.editMode,not(v.disabled))}">
+
+            <!-- Label -->
+            <div class="slds-p-bottom--small">
+                <label class="slds-form-element__label">
+                    <abbr class="slds-required" title="{!v.label+' is a required field'}">*</abbr>
+                    <span class="label-span">{!v.label}</span>
+                </label>
+            </div>
+
+            <div class="slds-form-element__control">
+
+                <!-- If we have selected something show the record Name and a remove button -->
+                <aura:if isTrue="{!not(empty(v.theSelectedId))}">
+                    <div class="slds-pill_container">
+                        <span class="slds-pill slds-size--1-of-1">
+                            <span class="slds-pill__label" title="{!v.theSelectedRecord.Name}">{!v.theSelectedRecord.Name}</span>
+                            <button class="slds-button slds-button--icon slds-pill__remove" title="Remove" onclick="{!c.removeValue}">
+                                <lightning:icon iconName="utility:close" size="x-small" alternativeText="Remove Icon" class="slds-button__icon"/>
+                                <span class="slds-assistive-text">Remove</span>
+                            </button>
+                        </span>
+                    </div>
+                    <aura:set attribute="else">
+
+                        <!-- Show the input search field -->
+                        <div class="slds-input-has-icon slds-input-has-icon--right">
+                            <lightning:icon iconName="utility:search" size="x-small" alternativeText="Search Icon" class="lookup-cmp-icon"/>
+                            <ui:inputText aura:id="searchInput" class="slds-lookup__search-input slds-input" placeholder="{!'Search '+v.sObjectTypeLabelPlural}" value="{!v.searchTerm}" keyup="{!c.searchRecords}" updateOn="keyup"/>
+                        </div>
+                    </aura:set>
+                </aura:if>
+            </div>
+
+            <!-- Lookup dropdown -->
+            <div class="slds-lookup__menu">
+
+                <!-- Search and status indicator -->
+                <div class="slds-lookup__item--label slds-text-body--small">
+                    <div class="{!'slds-spinner_container'+(v.searchComplete ? ' slds-hide' : '')}">
+                        <div role="status" class="slds-spinner slds-spinner--x-small">
+                            <span class="slds-assistive-text">Loading</span>
+                            <div class="slds-spinner__dot-a"></div>
+                            <div class="slds-spinner__dot-b"></div>
+                        </div>
+                    </div>
+                    {!(v.searchComplete ? 'Search completed' : 'Searching')+' for "'+v.searchTerm+'" in '+v.sObjectTypeLabelPlural+(v.searchComplete ? ' ['+v.results.length+' record'+(v.results.length > 1 ? 's' : '')+' returned]' : '')}
+                </div>
+
+                <!-- Result list -->
+                <ul class="slds-lookup__list" role="listbox">
+                    <aura:iteration items="{!v.results}" var="result" indexVar="resultIndex">
+                        <li class="{!resultIndex == 0 ? 'slds-has-divider--top-space' : ''}" role="presentation" data-id="{!result.Id}" onclick="{!c.selectLookupResult}">
+                            <span class="slds-lookup__item-action slds-media" id="lookup-option-490" role="option" data-id="{!result.Id}">
+                                <div class="slds-media__body" data-id="{!result.Id}">
+                                    <div class="slds-lookup__result-text" data-id="{!result.Id}">{!result.Name}</div>
+                                </div>
+                            </span>
+                        </li>
+                    </aura:iteration>
+                </ul>
+            </div>
+            <aura:set attribute="else">
+
+                <!-- If we have a selected record -->
+                <aura:if isTrue="{!not(empty(v.theSelectedId))}">
+
+                    <!-- Container for popover -->
+                    <div onmouseenter="{!c.toggleSelectedRecordPopover}" onmouseleave="{!c.toggleSelectedRecordPopover}">
+
+                        <!-- Show the record name and link with mouseover popup -->
+                        <a onclick="{!c.goToSelectedRecord}" class="textUnderline slds-truncate">
+                            {!v.theSelectedRecord.Name}
+                        </a>
+                        <div aura:id="selectedRecordPopover" class="slds-popover slds-popover--panel slds-nubbin--left-top slds-hide" role="dialog">
+                            <div class="slds-popover__header">
+                                <div class="slds-media slds-m-bottom--small slds-media--center">
+                                    <div class="slds-media__figure">
+                                    <span class="slds-icon_container slds-icon-standard-account">
+                                        <lightning:icon iconName="standard:account" size="medium" alternativeText="Account Icon"/>
+                                        <span class="slds-assistive-text">{!v.theSelectedRecord.Name}</span>
+                                    </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <p class="slds-text-title--caps slds-line-height--reset">{!v.sObjectTypeLabel}</p>
+                                        <p class="slds-text-heading--medium slds-hyphenate">
+                                            <a onclick="{!c.goToSelectedRecord}">{!v.theSelectedRecord.Name}</a>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-wrap slds-grid--pull-padded">
+                                    <div class="slds-p-horizontal--small slds-size--1-of-2 slds-p-bottom--x-small">
+                                        <dl>
+                                            <dt>
+                                                <p class="slds-text-title--caps slds-truncate" title="Created Date">Created Date</p>
+                                            </dt>
+                                            <dd>
+                                                <ui:outputDateTime value="{!v.theSelectedRecord.CreatedDate}" class="slds-truncate1"/>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                    <div class="slds-p-horizontal--small slds-size--1-of-2 slds-p-bottom--x-small">
+                                        <dl>
+                                            <dt>
+                                                <p class="slds-text-title--caps slds-truncate" title="Last Modified Date">Last Modified Date</p>
+                                            </dt>
+                                            <dd>
+                                                <ui:outputDateTime value="{!v.theSelectedRecord.LastModifiedDate}" class="slds-truncate1"/>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <aura:set attribute="else">
+
+                        <!-- Show that the record has nothing set -->
+                        <span class="slds-badge">
+                            No value set
+                        </span>
+                    </aura:set>
+                </aura:if>
+            </aura:set>
+        </aura:if>
+    </div>
+
+</aura:component>

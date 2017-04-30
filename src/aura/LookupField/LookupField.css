@@ -1,0 +1,45 @@
+/**
+ * @author:      Tiaan Swart (tiaan@cloudinit.nz)
+ * @date:        22 April 2017
+ * @description: CSS for Lookup Field Component
+ **/
+.THIS .slds-input-has-icon--right .lookup-cmp-icon svg {
+    right: 1.25rem !important;
+}
+.THIS .slds-input-has-icon .lookup-cmp-icon svg {
+    width: 1rem !important;
+    height: 1rem !important;
+    position: absolute !important;
+    top: 50% !important;
+    margin-top: -.5rem !important;
+    fill: #9faab5 !important;
+}
+.THIS.slds-lookup.slds-is-open .slds-lookup__menu {
+    position: absolute;
+}
+.THIS.slds-lookup.slds-is-open .uiInput--input .input,
+.THIS.slds-lookup.slds-is-open .uiInput--input.input {
+    border-radius: .25rem .25rem 0 0;
+}
+.THIS.slds-lookup.slds-is-open .slds-lookup__menu {
+    border-radius: 0 0 .25rem .25rem;
+}
+.THIS .slds-lookup__item--label .slds-spinner_container {
+    position: relative;
+    width: 25px;
+    height: 18px;
+    margin-right: 10px;
+}
+.THIS .slds-pill__label {
+    margin-left: 5px;
+}
+.THIS a.textUnderline:hover,
+.THIS a.textUnderline:focus {
+    border-bottom: 1px dotted;
+    text-decoration: none;
+}
+.THIS .slds-popover {
+    top: -25px;
+    margin-left: 20px;
+    position: absolute;
+}

@@ -1,0 +1,115 @@
+<aura:component controller="FieldsetService" implements="flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName">
+
+    <!-- Handle component initiation -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <!-- Layout specific attributes -->
+    <aura:attribute name="columns" type="Integer" default="2" required="true" />
+
+    <!-- The name of the fieldset used to query fields -->
+    <aura:attribute name="fieldSetName" type="String" default="Enter field set name" required="true" />
+    <aura:attribute name="fieldsetFields" type="Object" access="PRIVATE"/>
+
+    <!-- General error variable for the page -->
+    <aura:attribute name="theError" type="String" access="PRIVATE"/>
+
+    <!-- Attributes used by Record Preview -->
+    <aura:attribute name="theRecord" type="Object" access="PRIVATE"/>
+    <aura:attribute name="theRecordError" type="String" access="PRIVATE"/>
+    <aura:attribute name="fieldNames" type="String[]" default="['Name']" access="PRIVATE"/>
+
+    <!-- Record Preview - used to query the record and share with the page -->
+    <force:recordPreview aura:id="forceRecord"
+                         fields="{!v.fieldNames}"
+                         recordId="{!v.recordId}"
+                         targetRecord="{!v.theRecord}"
+                         targetError="{!v.theRecordError}"
+                         recordUpdated="{!c.recordUpdated}"
+                         mode="{!v.editMode ? 'EDIT' : 'VIEW'}"/>
+
+    <!-- Record Detail View Attributes -->
+    <aura:attribute name="showIcon" type="Boolean" default="true" />
+    <aura:attribute name="icon" type="String" default="action:description" />
+    <aura:attribute name="iconSize" type="String" default="small" />
+    <aura:attribute name="showTitle" type="Boolean" default="true" />
+    <aura:attribute name="title" type="String"/>
+    <aura:attribute name="setNameAsTitle" type="Boolean" default="true"/>
+    <aura:attribute name="showObjectTypeTitle" type="Boolean" default="true" />
+    <aura:attribute name="allowCreateNew" type="Boolean" default="true" />
+    <aura:attribute name="allowEdit" type="Boolean" default="true" />
+    <aura:attribute name="allowRefresh" type="Boolean" default="true" />
+
+    <!-- Record Detail View Attributes set through Controller / Helper -->
+    <aura:attribute name="sObjectTypeLabel" type="String" access="PRIVATE"/>
+    <aura:attribute name="sObjectTypeLabelPlural" type="String" access="PRIVATE"/>
+    <aura:attribute name="editMode" type="Boolean" default="false" access="PRIVATE"/>
+    <aura:attribute name="recordDetailView" type="Aura.Component[]" access="PRIVATE"/>
+
+    <!-- Loading spinner for processing feedback -->
+    <lightning:spinner aura:id="loadingSpinner" size="small" variant="brand" alternativeText="Record loading. Please wait."/>
+
+    <!-- Display an error if we have one -->
+    <aura:if isTrue="{!or(not(empty(v.theRecordError)),not(empty(v.theError)))}">
+        <div>
+            <div class="slds-modal__header slds-theme--error slds-theme--alert-texture">
+                <h2 class="slds-text-heading--medium" id="prompt-heading-id">Record View Error</h2>
+            </div>
+            <div class="slds-modal__content slds-p-around--medium text-center">
+                <p>{!v.theRecordError}{!v.theError}</p>
+            </div>
+        </div>
+    </aura:if>
+
+    <!-- Display the record if we have no errors -->
+    <aura:if isTrue="{!and(empty(v.theRecordError),empty(v.theError))}">
+        <aura:if isTrue="{!or(v.showIcon,or(v.showObjectTypeTitle,or(v.showTitle,or(v.allowCreateNew,or(v.allowEdit,v.allowRefresh)))))}">
+            <div class="slds-page-header">
+                <div class="slds-grid">
+                    <div class="slds-col slds-has-flexi-truncate">
+                        <div class="slds-media slds-no-space slds-grow">
+                            <aura:if isTrue="{!v.showIcon}">
+                                <div class="slds-media__figure">
+                                    <lightning:icon iconName="{!v.icon}" size="{!v.iconSize}" alternativeText="Custom Icon"/>
+                                </div>
+                            </aura:if>
+                            <div class="slds-media__body">
+                                <aura:if isTrue="{!v.showObjectTypeTitle}">
+                                    <p class="slds-text-title--caps slds-line-height--reset">{!v.sObjectTypeLabel}</p>
+                                </aura:if>
+                                <aura:if isTrue="{!v.showTitle}">
+                                    <h1 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="{!v.title}">{!v.title}</h1>
+                                </aura:if>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                        <!-- Form Buttons -->
+                        <div class="slds-button-group" role="group">
+                            <aura:if isTrue="{!v.allowCreateNew}">
+                                <button class="slds-button slds-button--brand" onclick="{!c.createNewRecord}">
+                                    New
+                                </button>
+                            </aura:if>
+                            <aura:if isTrue="{!v.allowEdit}">
+                                <button class="slds-button slds-button--brand" onclick="{!c.toggleEditMode}">
+                                    {!(v.editMode ? 'Cancel' : 'Enable Edit')}
+                                </button>
+                            </aura:if>
+                            <aura:if isTrue="{!v.allowRefresh}">
+                                <button class="slds-button slds-button--brand" onclick="{!c.refreshRecord}">
+                                    Refresh
+                                </button>
+                            </aura:if>
+                            <aura:if isTrue="{!and(v.allowEdit, v.editMode)}">
+                                <button class="slds-button slds-button--brand" onclick="{!c.saveRecord}">Save</button>
+                            </aura:if>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aura:if>
+        <!-- The record view -->
+        {!v.recordDetailView}
+    </aura:if>
+
+</aura:component>
