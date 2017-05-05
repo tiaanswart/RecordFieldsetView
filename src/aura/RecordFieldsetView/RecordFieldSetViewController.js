@@ -5,8 +5,7 @@
      * @description: Init the Component
      **/
     doInit : function(component, event, helper) {
-        // Get attributes
-        var sObjectName = component.get('v.sObjectName');
+        // Get the fieldSetName
         var fieldSetName = component.get('v.fieldSetName');
         // If this is the default text for fieldsetName
         if (fieldSetName == 'Enter field set name') {
@@ -18,9 +17,9 @@
             return;
         } else {
             // Get the SObject Label
-            helper.getSObjectLabel(component, helper, sObjectName);
+            helper.getSObjectLabel(component, helper);
             // Get the Fieldset Fields
-            helper.getFieldsetFields(component, helper, sObjectName, fieldSetName);
+            helper.getFieldsetFields(component, helper);
         }
     },
 
@@ -30,8 +29,13 @@
      * @description: Handle Record Update
      **/
     recordUpdated : function(component, event, helper) {
-        // Build the record view again
-        helper.getRecordDetailView(component);
+        // If the title should be the same as the name
+        if (component.get('v.setNameAsTitle')) {
+            // Set the name as the title
+            helper.setNameAsTitle(component);
+        }
+        // Create the fields again
+        helper.createFieldComponents(component);
     },
 
     /**
@@ -58,14 +62,12 @@
     toggleEditMode : function(component, event, helper) {
         // Show the spinner
         helper.showSpinner(component);
-        // Toggle
+        // Toggle Edit Mode
         component.set('v.editMode', !component.get('v.editMode'));
         // Find the record
         var forceRecord = component.find('forceRecord');
         // Reload the record
         forceRecord.reloadRecord();
-        // Build the record view again
-        helper.getRecordDetailView(component);
     },
 
     /**
@@ -84,8 +86,6 @@
         forceRecord.reloadRecord();
         // Toggle edit mode
         component.set('v.editMode', false);
-        // Build the record view
-        helper.getRecordDetailView(component);
         // Inform the user
         helper.showQuickMessage('info','Refreshed','The '+sObjectTypeLabel+' has been refreshed!');
     },
@@ -100,14 +100,37 @@
         helper.showSpinner(component);
         // Get the SObject Label
         var sObjectTypeLabel = component.get('v.sObjectTypeLabel');
+        // Get the record
+        var theRecord = component.get('v.theRecord');
+        // Get the fieldsetFields
+        var fieldsetFields = component.get('v.fieldsetFields');
+        // Set the field validation check
+        var validationSuccess = false;
+        // If we have a record
+        if (theRecord) {
+            // For each field
+            for (var fieldName in fieldsetFields) {
+                // If key exists && the record has the field
+                if (fieldsetFields.hasOwnProperty(fieldName) && fieldName in theRecord) {
+                    // If the record is required && empty
+                    if (fieldsetFields[fieldName].required && $A.util.isEmpty(theRecord[fieldName])) {
+                        // Show an error
+                        helper.showQuickMessage('error','Validation Error', fieldsetFields[fieldName].label+' is required!');
+                        // Hide the spinner
+                        helper.hideSpinner(component);
+                        // Return
+                        return;
+                    }
+                    // @TODO: Input Validation
+                }
+            }
+        }
         // Find the record
         var forceRecord = component.find('forceRecord');
         // Save the record
         forceRecord.saveRecord();
         // Toggle edit mode
         component.set('v.editMode', false);
-        // Build the record view
-        helper.getRecordDetailView(component);
         // Inform the user
         helper.showQuickMessage('success','Saved','The '+sObjectTypeLabel+' has been saved!');
     }

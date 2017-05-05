@@ -32,7 +32,8 @@
      * @description: Show the spinner
      **/
     showSpinner : function(component) {
-        $A.util.removeClass(component.find('loadingSpinner'), 'slds-hide');
+        var loadingSpinner = component.find('loadingSpinner');
+        $A.util.removeClass(loadingSpinner instanceof Array ? loadingSpinner[0] : loadingSpinner, 'slds-hide');
     },
 
     /**
@@ -41,7 +42,8 @@
      * @description: Hide the spinner
      **/
     hideSpinner : function(component) {
-        $A.util.addClass(component.find('loadingSpinner'), 'slds-hide');
+        var loadingSpinner = component.find('loadingSpinner');
+        $A.util.addClass(loadingSpinner instanceof Array ? loadingSpinner[0] : loadingSpinner, 'slds-hide');
     },
 
     /**
@@ -92,9 +94,12 @@
      * @date:        21 April 2017
      * @description: Create a column
      **/
-    createColumn : function(component, body, size, bindComponent) {
-        var mediumSize = 6/size;
-        var largeSize = 12/size;
+    createColumn : function(component, body, bindComponent) {
+        // Get the columns / size
+        var columns = component.get('v.columns');
+        // Set sizes
+        var mediumSize = 6/columns;
+        var largeSize = 12/columns;
         this.createHTML(
             component,
             body,
@@ -148,6 +153,7 @@
             field['recordId'] = component.get('v.recordId');
             field['editMode'] = true;
         }
+        // Create the component
         $A.createComponent(
             field.type in customInputFieldTypeMap ? customInputFieldTypeMap[field.type] : 'lightning:input',
             field,
@@ -198,7 +204,7 @@
         // If this is a lookup
         if (field.type == 'lookup') {
             // Add the required attributes
-            field['theRecordId'] = component.get('v.recordId');
+            field['recordId'] = component.get('v.recordId');
             field['editMode'] = false;
         }
         $A.createComponent(
@@ -284,88 +290,69 @@
     /**
      * @author:      Tiaan Swart (tiaan@cloudinit.nz)
      * @date:        21 April 2017
-     * @description: Create a field, output & label or input
+     * @description: Create a field output & label or input if not disabled
      **/
-    createField : function(component, fieldName, field, columns, editMode, bindComponent) {
-        // Depending on the Edit Mode create component
-        var input = [];
-        // If in edit mode and can be edited
-        if (editMode && !field.disabled) {
+    createField : function(component, fieldName, field, bindContainer) {
+        // Clear the container for the field
+        var fieldContainer = [];
+        // If we are in editMode and the field is editable
+        if (component.get('v.editMode') && !field.disabled) {
             // If this is a richtext we need a label
             if (field.type == 'richtext') {
                 // Create a label
-                this.createLabel(component, fieldName, field, input);
+                this.createLabel(component, fieldName, field, fieldContainer);
             }
-            this.createInputField(component, fieldName, field, input);
+            // Create the input
+            this.createInputField(component, fieldName, field, fieldContainer);
         } else {
             // Create a label
-            this.createLabel(component, fieldName, field, input);
+            this.createLabel(component, fieldName, field, fieldContainer);
             // Create the output
-            this.createOutputField(component, fieldName, field, input);
+            this.createOutputField(component, fieldName, field, fieldContainer);
         }
-        // Create a container and add the input
-        var container = [];
-        this.createHTML(
-            component,
-            input,
-            'div',
-            {'class':'slds-p-top--small slds-p-bottom--small slds-border--bottom'},
-            container
-        );
-        // Create a new column and add the container
-        this.createColumn(component, container, columns, bindComponent);
+        // Create a wrapper for the field container
+        var fieldWrapper = [];
+        this.createHTML(component, fieldContainer, 'div', {'class':'slds-p-top--small slds-p-bottom--small slds-border--bottom'}, fieldWrapper);
+        // Create a new column and add the wrapper
+        this.createColumn(component, fieldWrapper, bindContainer);
     },
 
     /**
      * @author:      Tiaan Swart (tiaan@cloudinit.nz)
-     * @date:        21 April 2017
-     * @description: Build the record view
+     * @date:        4 May 2017
+     * @description: Create the field components
      **/
-    getRecordDetailView : function(component) {
+    createFieldComponents : function(component) {
         // Show the spinner
         this.showSpinner(component);
-        // If the title should be the same as the name
-        if (component.get('v.setNameAsTitle')) {
-            // Set the name as the title
-            this.setNameAsTitle(component);
-        }
-        // Reset the record view
+        // Init field container
         var recordDetailView = [];
-        // Get the columns
-        var columns = component.get('v.columns');
-        // Get the mode
-        var editMode = component.get('v.editMode');
         // Get the record
         var theRecord = component.get('v.theRecord');
-        // Get the fieldset
-        var fieldNames = component.get('v.fieldNames');
+        // Get the fieldsetFields
         var fieldsetFields = component.get('v.fieldsetFields');
-        // Keep track of the inputs
-        var inputs = [];
         // If we have a record
         if (theRecord) {
             // For each field
-            for (var field in fieldsetFields) {
-                if (fieldsetFields.hasOwnProperty(field)) {
-                    // If the record has the field
-                    if (field in theRecord) {
-                        // Create a new input
-                        this.createField(
-                            component,
-                            field,
-                            fieldsetFields[field],
-                            columns,
-                            editMode,
-                            inputs
-                        );
-                    }
+            for (var fieldName in fieldsetFields) {
+                // If key exists and the record has the field
+                if (fieldsetFields.hasOwnProperty(fieldName) && fieldName in theRecord) {
+                    // Create a new field
+                    this.createField(
+                        component,
+                        fieldName,
+                        fieldsetFields[fieldName],
+                        recordDetailView
+                    );
                 }
             }
         }
-        // Create a grid block
-        this.createGrid(component, inputs, recordDetailView);
-        // Set the new record detail view
-        component.set('v.recordDetailView', recordDetailView);
+        // Create grid container
+        var recordDetailViewGrid = [];
+        // Create a grid block for fields
+        this.createGrid(component, recordDetailView, recordDetailViewGrid);
+        // Set the field grid
+        component.set('v.recordDetailView', recordDetailViewGrid);
         // Hide the spinner
         this.hideSpinner(component);
     },
@@ -375,9 +362,11 @@
      * @date:        21 April 2017
      * @description: Get the sObject Label
      **/
-    getSObjectLabel : function(component, helper, sObjectName) {
+    getSObjectLabel : function(component, helper) {
         // Show the spinner
         this.showSpinner(component);
+        // Get the sObjectName
+        var sObjectName = component.get('v.sObjectName');
         // Setup the server call to get the sobject label
         var getSObjectTypeLabelAction = component.get('c.getSObjectTypeLabel');
         // Add the Params
@@ -416,11 +405,11 @@
                 }
                 component.set('v.theError', theError);
             }
+            // Hide the spinner
+            helper.hideSpinner(component);
         });
         // Add the server action call to the queue
         $A.enqueueAction(getSObjectTypeLabelAction);
-        // Hide the spinner
-        this.hideSpinner(component);
     },
 
     /**
@@ -440,9 +429,13 @@
      * @date:        21 April 2017
      * @description: Get all of the Fields from the fieldset
      **/
-    getFieldsetFields : function(component, helper, sObjectName, fieldSetName) {
+    getFieldsetFields : function(component, helper) {
         // Show the spinner
         this.showSpinner(component);
+        // Get the sObjectName
+        var sObjectName = component.get('v.sObjectName');
+        // Get the fieldSetName
+        var fieldSetName = component.get('v.fieldSetName');
         // Setup the server call to get the fieldset
         var getFieldsetAction = component.get('c.getFieldset');
         // Add the Params
@@ -463,10 +456,8 @@
                     component.set('v.fieldNames', Object.keys(component.get('v.fieldsetFields')));
                     // Find the record
                     var forceRecord = component.find('forceRecord');
-                    // Reload the record with the new fields
+                    // Reload the record with the new fields (Will trigger reload and build component)
                     forceRecord.reloadRecord();
-                    // Build the record view
-                    helper.getRecordDetailView(component);
                 } else {
                     // Set the error
                     component.set('v.theError', 'Error Message: ' + fieldsetFields.error);
@@ -486,10 +477,10 @@
                 }
                 component.set('v.theError', theError);
             }
+            // Hide the spinner
+            helper.hideSpinner(component);
         });
         // Add the server action call to the queue
         $A.enqueueAction(getFieldsetAction);
-        // Hide the spinner
-        this.hideSpinner(component);
-    },
+    }
 })

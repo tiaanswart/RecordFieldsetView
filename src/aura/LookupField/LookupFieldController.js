@@ -5,7 +5,6 @@
      * @description: Init the Component
      **/
     doInit : function(component, event, helper) {
-        console.log(component.get('v.recordId'));
         // Get attributes
         var name = component.get('v.name');
         var fieldNames = component.get('v.fieldNames');
@@ -60,18 +59,8 @@
      * @description: Search for records
      **/
     searchRecords : function(component, event, helper) {
-        // Get the searchTerm
-        var searchTerm = component.get('v.searchTerm');
-        // If we have a search term
-        if (searchTerm.length >= 2) {
-            // Expand the list
-            component.set('v.expanded', true);
-            // Search the records
-            helper.searchSObjectRecords(component, helper);
-        } else {
-            // Hide the list
-            component.set('v.expanded', false);
-        }
+        // Search the records
+        helper.searchSObjectRecords(component, helper);
     },
 
     /**
@@ -90,8 +79,10 @@
             component.set('v.searchTerm', null);
             // Get the name
             var name = component.get('v.name');
-            // Get the value of the field
+            // Set the value of the field on the record
             component.set('v.theRecord.'+name, theSelectedId);
+            // Set the value of the component
+            component.set('v.value', theSelectedId);
             // Reload the Lookup
             helper.loadLookup(component);
         }

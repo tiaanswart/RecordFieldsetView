@@ -26,7 +26,7 @@ public with sharing class FieldsetService {
             Schema.DisplayType.PERCENT => 'number',
             Schema.DisplayType.PHONE => 'tel',
             Schema.DisplayType.PICKLIST => 'select',
-            Schema.DisplayType.REFERENCE => 'text',
+            Schema.DisplayType.REFERENCE => 'lookup',
             Schema.DisplayType.STRING => 'text',
             Schema.DisplayType.TEXTAREA => 'textarea',
             Schema.DisplayType.TIME => 'time',
@@ -115,11 +115,14 @@ public with sharing class FieldsetService {
 
                     // Get all of the values needed
                     Map<String, Object> fieldSetMember = new Map<String, Object>{
+                        'aura:id'   => 'field',
                         'name'      => f.getFieldPath(),
                         'label'     => f.getLabel(),
                         'type'      => type,
                         'required'  => f.getDbRequired() || f.getRequired(),
-                        'disabled'  => !editable
+                        'disabled'  => !editable,
+                        'recordId'  => '',
+                        'editMode'  => False
                     };
 
                     // If this is a date or datetime && editable
@@ -193,11 +196,14 @@ public with sharing class FieldsetService {
 
                     // Add the Name field
                     response.fieldSet.put('Name', new Map<String, Object>{
+                        'aura:id'   => 'field',
                         'name'      => 'Name',
                         'label'     => fieldDescribe.getLabel(),
                         'type'      => inputTypeMap.get(fieldDescribe.getType()),
                         'required'  => fieldDescribe.isNillable(),
-                        'disabled'  => !fieldDescribe.isUpdateable()
+                        'disabled'  => !fieldDescribe.isUpdateable(),
+                        'recordId'  => '',
+                        'editMode'  => False
                     });
 
                 }

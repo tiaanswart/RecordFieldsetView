@@ -32,7 +32,8 @@
      * @description: Show the spinner
      **/
     showSpinner : function(component) {
-        $A.util.removeClass(component.find('loadingSpinner'), 'slds-hide');
+        var loadingSpinner = component.find('loadingSpinner');
+        $A.util.removeClass(loadingSpinner instanceof Array ? loadingSpinner[0] : loadingSpinner, 'slds-hide');
     },
 
     /**
@@ -41,7 +42,8 @@
      * @description: Hide the spinner
      **/
     hideSpinner : function(component) {
-        $A.util.addClass(component.find('loadingSpinner'), 'slds-hide');
+        var loadingSpinner = component.find('loadingSpinner');
+        $A.util.addClass(loadingSpinner instanceof Array ? loadingSpinner[0] : loadingSpinner, 'slds-hide');
     },
 
     /**
@@ -183,16 +185,23 @@
      * @description: Search the records with the search term
      **/
     searchSObjectRecords : function(component, helper) {
-        // Show the spinner
-        this.showSpinner(component);
+        // Indicate that the search will start
+        component.set('v.searchComplete', false);
         // Get the sObjectName
         var sObjectName = component.get('v.sObjectName');
         // Get the searchTerm
         var searchTerm = component.get('v.searchTerm');
+        // If the search term is too short
+        if (searchTerm.length < 2) {
+            // Hide the list
+            component.set('v.expanded', false);
+            return;
+        } else {
+            // Expand the list
+            component.set('v.expanded', true);
+        }
         // Clear the records
         component.set('v.results', []);
-        // Indicate that the search will start
-        component.set('v.searchComplete', true);
         // Setup the server call to get the records
         var searchRecordsAction = component.get('c.searchSObjectRecords');
         // Add the Params
@@ -207,10 +216,18 @@
                 var recordSearchResult = response.getReturnValue();
                 // If there is no error
                 if (!('error' in recordSearchResult)) {
-                    // Store the records
-                    component.set('v.results', recordSearchResult.records);
-                    // Make sure the list is expanded
-                    component.set('v.expanded', true);
+                    // Get the searchTerm
+                    searchTerm = component.get('v.searchTerm');
+                    // If the search term is too short (user might have edited again)
+                    if (searchTerm.length < 2) {
+                        // Hide the list
+                        component.set('v.expanded', false);
+                    } else {
+                        // Store the records
+                        component.set('v.results', recordSearchResult.records);
+                        // Make sure the list is expanded
+                        component.set('v.expanded', true);
+                    }
                     // Indicate that the search is complete
                     component.set('v.searchComplete', true);
                 } else {
@@ -232,8 +249,6 @@
                 }
                 component.set('v.theError', theError);
             }
-            // Hide the spinner
-            helper.hideSpinner(component);
         });
         // Add the server action call to the queue
         $A.enqueueAction(searchRecordsAction);
