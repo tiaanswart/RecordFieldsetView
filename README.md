@@ -1,4 +1,4 @@
-<a taget="_blank" href="https://githubsfdeploy.herokuapp.com">
+<a target="_blank" href="https://githubsfdeploy.herokuapp.com">
   <img alt="Deploy to Salesforce"
        src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
 </a>
