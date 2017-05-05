@@ -1,21 +1,21 @@
-# RecordFieldsetView
-
-<a href="https://githubsfdeploy.herokuapp.com">
+<a taget="_blank" href="https://githubsfdeploy.herokuapp.com">
   <img alt="Deploy to Salesforce"
        src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
 </a>
+
+# RecordFieldsetView
 
 A Fieldset Lightning Component for Salesforce Lightning Experience.
 
 The component can be added to any Record Home Layout.
 
+To contribute, please fork, update, push and create a pull request.
+
 ### Functions available:
 
-1. Create new record (using standard record fields)
+1. [Create new record](https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/ref_force_createRecord.htm) (using standard record fields)
 1. Edit the current record (using the fieldset field list)
 1. Refresh the current record
-
-The component gets the fields from the fieldset and constructs output or input by field type.
 
 ### Supported Field Types (Schema.DisplayType):
 
@@ -35,13 +35,10 @@ The component gets the fields from the fieldset and constructs output or input b
 1. PHONE
 1. PICKLIST
 1. STRING
+1. REFERENCE
 1. TEXTAREA
 1. TIME
 1. URL
-
-### Field Types Support coming soon (Schema.DisplayType):
-
-1. REFERENCE
 
 ### Lightning Component Settings (Design attributes):
 
