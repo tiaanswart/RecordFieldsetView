@@ -94,9 +94,7 @@
      * @date:        21 April 2017
      * @description: Create a column
      **/
-    createColumn : function(component, body, bindComponent) {
-        // Get the columns / size
-        var columns = component.get('v.columns');
+    createColumn : function(component, body, bindComponent, columns) {
         // Set sizes
         var mediumSize = 6/columns;
         var largeSize = 12/columns;
@@ -122,7 +120,6 @@
      * @author:      Tiaan Swart (tiaan@cloudinit.nz)
      * @date:        21 April 2017
      * @description: Create an input component per type
-     * @TODO Input Lookup
      **/
     createInputField : function(component, fieldName, field, bindComponent) {
         // Get the record
@@ -183,6 +180,7 @@
     createOutputUI : function(component, fieldName, field, bindComponent) {
         // Map the different types of output
         var customOutputFieldTypeMap = {
+            address         :   'ui:outputText',
             text            :   'ui:outputText',
             checkbox        :   'ui:outputCheckbox',
             date            :   'ui:outputDate',
@@ -232,7 +230,6 @@
      * @author:      Tiaan Swart (tiaan@cloudinit.nz)
      * @date:        21 April 2017
      * @description: Create an output component
-     * @TODO Output Lookup
      **/
     createOutputField : function(component, fieldName, field, bindComponent) {
         // Get the record
@@ -255,11 +252,37 @@
                     component,
                     theRecord[fieldName],
                     'a',
-                    {'href':url,'target':'_blank','class':'uiOutputURL'},
+                    {'href':url,'target':'_blank','class':'uiOutputURL slds-truncate','style':'display: inline-block;'},
                     bindComponent
                 );
             } else {
                 this.createOutputUI(component, fieldName, field, bindComponent);
+                // If this is an address (for demo purposes manually show address for streets)
+                if (field.type == 'address' || fieldName == 'BillingStreet' || fieldName == 'ShippingStreet') {
+                    // Get the encoded address
+                    var encodedAddress = encodeURI(theRecord[fieldName]);
+                    // Create the URL
+                    var url = 'https://www.google.com/maps/place/' + encodedAddress;
+                    // Create the image url
+                    var imgURL = 'https://maps.googleapis.com/maps/api/staticmap?center=' + encodedAddress + '&zoom=14&scale=false&size=250x125&maptype=roadmap&format=png&visual_refresh=true';
+                    // Create the image
+                    var theMapImage = [];
+                    this.createHTML(
+                        component,
+                        '',
+                        'img',
+                        {'src':imgURL,'alt':theRecord[fieldName]},
+                        theMapImage
+                    );
+                    // Create the anchor link
+                    this.createHTML(
+                        component,
+                        theMapImage,
+                        'a',
+                        {'href':url,'target':'_blank','class':'slds-m-top--medium','style':'display:block;'},
+                        bindComponent
+                    );
+                }
             }
         } else {
             this.createHTML(component, 'No value set', 'span', {'class':'slds-badge'}, bindComponent);
@@ -292,7 +315,7 @@
      * @date:        21 April 2017
      * @description: Create a field output & label or input if not disabled
      **/
-    createField : function(component, fieldName, field, bindContainer) {
+    createField : function(component, fieldName, field, bindContainer, columns, fieldIndex) {
         // Clear the container for the field
         var fieldContainer = [];
         // If we are in editMode and the field is editable
@@ -312,9 +335,9 @@
         }
         // Create a wrapper for the field container
         var fieldWrapper = [];
-        this.createHTML(component, fieldContainer, 'div', {'class':'slds-p-top--small slds-p-bottom--small slds-border--bottom'}, fieldWrapper);
+        this.createHTML(component, fieldContainer, 'div', {'class':'slds-p-top--small slds-p-bottom--small'+(fieldIndex > columns ? ' slds-border--top' : '')}, fieldWrapper);
         // Create a new column and add the wrapper
-        this.createColumn(component, fieldWrapper, bindContainer);
+        this.createColumn(component, fieldWrapper, bindContainer, columns);
     },
 
     /**
@@ -333,16 +356,24 @@
         var fieldsetFields = component.get('v.fieldsetFields');
         // If we have a record
         if (theRecord) {
+            // Get the columns / size
+            var columns = component.get('v.columns');
+            // Keep track of the field index
+            var fieldIndex = 0;
             // For each field
             for (var fieldName in fieldsetFields) {
                 // If key exists and the record has the field
                 if (fieldsetFields.hasOwnProperty(fieldName) && fieldName in theRecord) {
+                    // Increment the field index
+                    fieldIndex += 1;
                     // Create a new field
                     this.createField(
                         component,
                         fieldName,
                         fieldsetFields[fieldName],
-                        recordDetailView
+                        recordDetailView,
+                        columns,
+                        fieldIndex
                     );
                 }
             }
@@ -369,6 +400,8 @@
         var sObjectName = component.get('v.sObjectName');
         // Setup the server call to get the sobject label
         var getSObjectTypeLabelAction = component.get('c.getSObjectTypeLabel');
+        // Store server response if possible
+        getSObjectTypeLabelAction.setStorable();
         // Add the Params
         getSObjectTypeLabelAction.setParams({sObjectName : sObjectName});
         // Create a callback that is executed after the server-side action returns
@@ -438,6 +471,8 @@
         var fieldSetName = component.get('v.fieldSetName');
         // Setup the server call to get the fieldset
         var getFieldsetAction = component.get('c.getFieldset');
+        // Store server response if possible
+        getFieldsetAction.setStorable();
         // Add the Params
         getFieldsetAction.setParams({sObjectName : sObjectName, fieldSetName : fieldSetName});
         // Create a callback that is executed after the server-side action returns

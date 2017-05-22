@@ -46,7 +46,7 @@
         var theRecord = component.get('v.theRecord');
         // Remove the value
         component.set('v.theRecord.'+name, null);
-        component.set('v.theSelectedId', null);
+        component.set('v.value', null);
         // Clear the search term
         component.set('v.searchTerm', null);
         // Hide the spinner
@@ -70,9 +70,9 @@
      **/
     selectLookupResult : function(component, event, helper) {
         // Get the Selected Record Id
-        var theSelectedId = event.srcElement.dataset.id;
+        var value = event.srcElement.dataset.id;
         // If we have a Selected Id
-        if (theSelectedId) {
+        if (value) {
             // Hide the list
             component.set('v.expanded', false);
             // Clear the search term
@@ -80,9 +80,9 @@
             // Get the name
             var name = component.get('v.name');
             // Set the value of the field on the record
-            component.set('v.theRecord.'+name, theSelectedId);
+            component.set('v.theRecord.'+name, value);
             // Set the value of the component
-            component.set('v.value', theSelectedId);
+            component.set('v.value', value);
             // Reload the Lookup
             helper.loadLookup(component);
         }
@@ -109,13 +109,13 @@
         // Show the spinner
         helper.showSpinner(component);
         // Get the selected record Id
-        var theSelectedId = component.get('v.theSelectedId');
+        var value = component.get('v.value');
         // If we have one
-        if (theSelectedId && theSelectedId != '') {
+        if (value && value != '') {
             // Go there
             var navEvt = $A.get("e.force:navigateToSObject");
             navEvt.setParams({
-                "recordId" : theSelectedId
+                "recordId" : value
             });
             navEvt.fire();
         }

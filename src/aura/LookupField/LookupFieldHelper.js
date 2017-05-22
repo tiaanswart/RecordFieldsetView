@@ -107,6 +107,8 @@
         var sObjectName = component.get('v.sObjectName');
         // Setup the server call to get the sobject label
         var getSObjectTypeLabelAction = component.get('c.getSObjectTypeLabel');
+        // Store server response if possible
+        getSObjectTypeLabelAction.setStorable();
         // Add the Params
         getSObjectTypeLabelAction.setParams({sObjectName : sObjectName});
         // Create a callback that is executed after the server-side action returns
@@ -165,11 +167,11 @@
         // Get the record
         var theRecord = component.get('v.theRecord');
         // Get the value of the field
-        component.set('v.theSelectedId', component.get('v.theRecord.'+name));
+        component.set('v.value', component.get('v.theRecord.'+name));
         // Get the selected id
-        var theSelectedId = component.get('v.theSelectedId');
+        var value = component.get('v.value');
         // If we have a selected id
-        if (theSelectedId && theSelectedId != '') {
+        if (value && value != '') {
             // Find the selected record
             var selectedRecord = component.find('selectedRecord');
             // Reload the selected record
@@ -204,6 +206,8 @@
         component.set('v.results', []);
         // Setup the server call to get the records
         var searchRecordsAction = component.get('c.searchSObjectRecords');
+        // Store server response if possible
+        searchRecordsAction.setStorable();
         // Add the Params
         searchRecordsAction.setParams({sObjectName : sObjectName, searchTerm : searchTerm});
         // Create a callback that is executed after the server-side action returns

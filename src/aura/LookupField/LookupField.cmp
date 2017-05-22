@@ -39,14 +39,13 @@
                          mode="{!v.editMode ? 'EDIT' : 'VIEW'}"/>
 
     <!-- Attributes used by Record Preview -->
-    <aura:attribute name="theSelectedId" type="String" access="PRIVATE"/>
     <aura:attribute name="theSelectedRecord" type="Object" access="PRIVATE"/>
     <aura:attribute name="theSelectedRecordError" type="String" access="PRIVATE"/>
 
     <!-- Record Preview - used to query the record and share with the page -->
     <force:recordPreview aura:id="selectedRecord"
                          fields="['Id','Name','CreatedDate','LastModifiedDate']"
-                         recordId="{!v.theSelectedId}"
+                         recordId="{!v.value}"
                          targetRecord="{!v.theSelectedRecord}"
                          targetError="{!v.theSelectedRecordError}"
                          recordUpdated="{!c.selectedRecordUpdated}"
@@ -56,9 +55,9 @@
     <lightning:spinner aura:id="loadingSpinner" size="small" variant="brand" alternativeText="Record loading. Please wait."/>
 
     <!-- Display an error if we have one -->
-    <aura:if isTrue="{!or(not(empty(v.theError)),or(and(not(empty(v.theRecordError)),not(empty(v.recordId))),and(not(empty(v.theSelectedRecordError)),not(empty(v.theSelectedId)))))}">
+    <aura:if isTrue="{!or(not(empty(v.theError)),or(and(not(empty(v.theRecordError)),not(empty(v.recordId))),and(not(empty(v.theSelectedRecordError)),not(empty(v.value)))))}">
         <ui:message title="Error" severity="error">
-            {!v.theError}&nbsp;{!v.theRecordError}&nbsp;{!and(not(empty(v.theSelectedRecordError)),not(empty(v.theSelectedId))) ? v.theSelectedRecordError : ''}
+            {!v.theError}&nbsp;{!v.theRecordError}&nbsp;{!and(not(empty(v.theSelectedRecordError)),not(empty(v.value))) ? v.theSelectedRecordError : ''}
         </ui:message>
     </aura:if>
 
@@ -79,7 +78,7 @@
             <div class="slds-form-element__control">
 
                 <!-- If we have selected something show the record Name and a remove button -->
-                <aura:if isTrue="{!not(empty(v.theSelectedId))}">
+                <aura:if isTrue="{!not(empty(v.value))}">
                     <div class="slds-pill_container">
                         <span class="slds-pill slds-size--1-of-1">
                             <span class="slds-pill__label" title="{!v.theSelectedRecord.Name}">{!v.theSelectedRecord.Name}</span>
@@ -131,7 +130,7 @@
             <aura:set attribute="else">
 
                 <!-- If we have a selected record -->
-                <aura:if isTrue="{!not(empty(v.theSelectedId))}">
+                <aura:if isTrue="{!not(empty(v.value))}">
 
                     <!-- Container for popover -->
                     <div onmouseenter="{!c.toggleSelectedRecordPopover}" onmouseleave="{!c.toggleSelectedRecordPopover}">

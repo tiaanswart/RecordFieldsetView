@@ -11,26 +11,26 @@ public with sharing class FieldsetService {
      * @description: Input Type Map
      **/
     private static Map<Schema.DisplayType, String> inputTypeMap = new Map<Schema.DisplayType, String>{
-            Schema.DisplayType.ADDRESS => 'text',
-            Schema.DisplayType.ANYTYPE => 'text',
-            Schema.DisplayType.BOOLEAN => 'checkbox',
-            Schema.DisplayType.CURRENCY => 'number',
-            Schema.DisplayType.DATE => 'date',
-            Schema.DisplayType.DATETIME => 'datetime',
-            Schema.DisplayType.DOUBLE => 'number',
-            Schema.DisplayType.EMAIL => 'email',
-            Schema.DisplayType.ENCRYPTEDSTRING => 'text',
-            Schema.DisplayType.ID => 'text',
-            Schema.DisplayType.INTEGER => 'number',
-            Schema.DisplayType.MULTIPICKLIST => 'select',
-            Schema.DisplayType.PERCENT => 'number',
-            Schema.DisplayType.PHONE => 'tel',
-            Schema.DisplayType.PICKLIST => 'select',
-            Schema.DisplayType.REFERENCE => 'lookup',
-            Schema.DisplayType.STRING => 'text',
-            Schema.DisplayType.TEXTAREA => 'textarea',
-            Schema.DisplayType.TIME => 'time',
-            Schema.DisplayType.URL => 'url'
+        Schema.DisplayType.ADDRESS => 'address',
+        Schema.DisplayType.ANYTYPE => 'text',
+        Schema.DisplayType.BOOLEAN => 'checkbox',
+        Schema.DisplayType.CURRENCY => 'number',
+        Schema.DisplayType.DATE => 'date',
+        Schema.DisplayType.DATETIME => 'datetime',
+        Schema.DisplayType.DOUBLE => 'number',
+        Schema.DisplayType.EMAIL => 'email',
+        Schema.DisplayType.ENCRYPTEDSTRING => 'text',
+        Schema.DisplayType.ID => 'text',
+        Schema.DisplayType.INTEGER => 'number',
+        Schema.DisplayType.MULTIPICKLIST => 'select',
+        Schema.DisplayType.PERCENT => 'number',
+        Schema.DisplayType.PHONE => 'tel',
+        Schema.DisplayType.PICKLIST => 'select',
+        Schema.DisplayType.REFERENCE => 'lookup',
+        Schema.DisplayType.STRING => 'text',
+        Schema.DisplayType.TEXTAREA => 'textarea',
+        Schema.DisplayType.TIME => 'time',
+        Schema.DisplayType.URL => 'url'
     };
 
     /**
