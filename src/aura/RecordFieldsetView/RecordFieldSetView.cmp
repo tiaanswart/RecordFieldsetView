@@ -19,7 +19,7 @@
     <aura:attribute name="fieldNames" type="String[]" default="['Name']" access="PRIVATE"/>
 
     <!-- Record Preview - used to query the record and share with the page -->
-    <force:recordPreview aura:id="forceRecord"
+    <force:recordData aura:id="forceRecord"
                          fields="{!v.fieldNames}"
                          recordId="{!v.recordId}"
                          targetRecord="{!v.theRecord}"
