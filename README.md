@@ -1,8 +1,3 @@
-<a target="_blank" href="https://githubsfdeploy.herokuapp.com">
-  <img alt="Deploy to Salesforce"
-       src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
-</a>
-
 # RecordFieldsetView
 
 A Fieldset Lightning Component for Salesforce Lightning Experience.
@@ -10,6 +5,30 @@ A Fieldset Lightning Component for Salesforce Lightning Experience.
 The component can be added to any Record Home Layout.
 
 To contribute, please fork, update, push and create a pull request.
+
+### Summer 17 - Lightning Data Service (Beta):
+
+Please refer to the [release notes](https://releasenotes.docs.salesforce.com/en-us/summer17/release-notes/rn_lightning_data_service.htm).
+
+`force:recordPreview` has been *deprecated* and *replaced* with `force:recordData`.
+
+#### Known limitations:
+
+1. `force:recordData` does not support User type Object (CreatedBy, Owner, LastModifiedBy, etc)
+
+### Production / Sandbox (`force:recordData`):
+
+<a href="https://githubsfdeploy.herokuapp.com?owner=tiaanswart&repo=RecordFieldsetView&ref=master">
+  <img alt="Deploy to Salesforce"
+       src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
+</a>
+
+### Developer Edition (`force:recordPreview`):
+
+<a href="https://githubsfdeploy.herokuapp.com?owner=tiaanswart&repo=RecordFieldsetView&ref=develop">
+  <img alt="Deploy to Salesforce"
+       src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
+</a>
 
 ### Functions available:
 
