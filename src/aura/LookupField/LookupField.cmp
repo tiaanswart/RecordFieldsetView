@@ -25,32 +25,28 @@
     <aura:attribute name="theError" type="String" access="PRIVATE"/>
 
     <!-- Attributes used by Record Preview -->
-    <aura:attribute name="theMainRecord" type="Object" access="PRIVATE"/>
     <aura:attribute name="theRecord" type="Object" access="PRIVATE"/>
     <aura:attribute name="theRecordError" type="String" access="PRIVATE"/>
     <aura:attribute name="fieldNames" type="String[]" default="['Name']"/>
 
     <!-- Record Preview - used to query the record and share with the page -->
-    <force:recordData aura:id="forceRecord"
+    <force:recordPreview aura:id="forceRecord"
                          fields="{!v.fieldNames}"
                          recordId="{!v.recordId}"
-                         targetRecord="{!v.theMainRecord}"
-                         targetFields="{!v.theRecord}"
+                         targetRecord="{!v.theRecord}"
                          targetError="{!v.theRecordError}"
                          recordUpdated="{!c.recordUpdated}"
                          mode="{!v.editMode ? 'EDIT' : 'VIEW'}"/>
 
     <!-- Attributes used by Record Preview -->
-    <aura:attribute name="theMainSelectedRecord" type="Object" access="PRIVATE"/>
     <aura:attribute name="theSelectedRecord" type="Object" access="PRIVATE"/>
     <aura:attribute name="theSelectedRecordError" type="String" access="PRIVATE"/>
 
     <!-- Record Preview - used to query the record and share with the page -->
-    <force:recordData aura:id="selectedRecord"
+    <force:recordPreview aura:id="selectedRecord"
                          fields="['Id','Name','CreatedDate','LastModifiedDate']"
                          recordId="{!v.value}"
-                         targetRecord="{!v.theMainSelectedRecord}"
-                         targetFields="{!v.theSelectedRecord}"
+                         targetRecord="{!v.theSelectedRecord}"
                          targetError="{!v.theSelectedRecordError}"
                          recordUpdated="{!c.selectedRecordUpdated}"
                          mode="VIEW"/>
